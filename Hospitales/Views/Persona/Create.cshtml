@@ -1,0 +1,97 @@
+﻿@model Hospitales.Clases.PersonaCLS
+
+@{
+    ViewData["Title"] = "Personas";
+    List<SelectListItem> listaSexos = ViewBag.Sexos;
+}
+
+<h1>Create</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Guardar" asp-controller="Persona" method="post" id="frm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+                @if (Model != null && Model.Mensaje != "")
+                {
+                    <p class="text-danger">@Model.Mensaje</p>
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="Appaterno" class="control-label"></label>
+                <input asp-for="Appaterno" class="form-control" />
+                <span asp-validation-for="Appaterno" class="text-danger"></span>
+                @if (Model != null && Model.Mensaje != "")
+                {
+                    <p class="text-danger">@Model.Mensaje</p>
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="Apmaterno" class="control-label"></label>
+                <input asp-for="Apmaterno" class="form-control" />
+                <span asp-validation-for="Apmaterno" class="text-danger"></span>
+                @if (Model != null && Model.Mensaje != "")
+                {
+                    <p class="text-danger">@Model.Mensaje</p>
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+                @if (Model != null && Model.MensajeEmail != "")
+                {
+                    <p class="text-danger">@Model.MensajeEmail</p>
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="Direccion" class="control-label"></label>
+                <input asp-for="Direccion" class="form-control" />
+                <span asp-validation-for="Direccion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Telefonofijo" class="control-label"></label>
+                <input asp-for="Telefonofijo" class="form-control" />
+                <span asp-validation-for="Telefonofijo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Telefonocelular" class="control-label"></label>
+                <input asp-for="Telefonocelular" class="form-control" />
+                <span asp-validation-for="Telefonocelular" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Fechanacimiento" class="control-label"></label>
+                <input asp-for="Fechanacimiento" class="form-control" />
+                <span asp-validation-for="Fechanacimiento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Iidsexo" class="control-label"></label>
+                <select asp-for="Iidsexo" asp-items="listaSexos" class="form-select"></select>
+                <span asp-validation-for="Iidsexo" class="text-danger"></span>
+            </div>
+            <div class="form-group d-flex justify-content-between mt-4">
+                <a asp-action="Index" asp-controller="Persona" class="btn btn-secondary">Cancelar</a>
+                <input type="button" value="Acepar" class="btn btn-primary" onclick="Enviar()" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function Enviar() {
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    document.getElementById("frm").submit();
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+    </script>
+}
+
+

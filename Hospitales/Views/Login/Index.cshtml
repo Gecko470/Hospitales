@@ -1,0 +1,77 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+<div class="col-md-6 m-auto" style="position:relative;top:50%;transform:translateY(-50%)">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:600px;grid-gap:2em">
+
+        <div>
+            <img style="width:100%" src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcT82L50z2IJu1PeMUxuyFLrfkXGDSfTlnZh1i5ZpUTekgrSrbwW&usqp=CAU" />
+        </div>
+        <div>
+            <h3>Login</h3>
+            <div class="form-group mt-2">
+                <label>Usuario</label>
+                <input type="text" class="form-control" id="user" />
+                <span class="text-danger" style="display: none;" id="spnUser">Campo obligatorio..</span>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" class="form-control" id="pass" />
+                <span class="text-danger" style="display: none;" id="spnPass">Campo obligatorio..</span>
+            </div>
+            <div class="form-group mt-4">
+                <input type="button" class="btn btn-primary w-100" value="Aceptar" onclick="Login()" />
+                <a asp-controller="Login" asp-action="Registro" class="btn btn-secondary w-100 mt-2">
+                    Registro
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/site.js"></script>
+<script src="~/js/sweetalert2.min.js"></script>
+
+<script>
+    function Login() {
+        let user = document.getElementById("user").value;
+        let pass = document.getElementById("pass").value;
+
+        if (user == "") {
+            document.getElementById("spnUser").style.display = "block";
+        }
+        else if (pass == "") {
+            document.getElementById("spnPass").style.display = "block";
+        }
+        else {
+            let frm = new FormData();
+            frm.append("user", user);
+            frm.append("pass", pass);
+
+            $.ajax({
+                type: "POST",
+                url: "/Login/Login",
+                data: frm,
+                processData: false,
+                contentType: false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        document.location.href = "/Home/Index";
+                    }
+                    else {
+                        error();
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+
+
+

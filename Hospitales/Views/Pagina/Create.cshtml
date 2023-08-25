@@ -1,0 +1,54 @@
+﻿@model Hospitales.Clases.PaginaCLS
+
+@{
+    ViewData["Title"] = "Páginas";
+}
+
+<h1>Create</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Guardar" asp-controller="Pagina" method="post" id="frm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Mensaje" class="control-label"></label>
+                <input asp-for="Mensaje" class="form-control" />
+                <span asp-validation-for="Mensaje" class="text-danger"></span>
+                @if(Model != null && Model.ErrorMensaje != "")
+                {
+                    <p class="text-danger">@Model.ErrorMensaje</p>
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="Accion" class="control-label"></label>
+                <input asp-for="Accion" class="form-control" />
+                <span asp-validation-for="Accion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Controlador" class="control-label"></label>
+                <input asp-for="Controlador" class="form-control" />
+                <span asp-validation-for="Controlador" class="text-danger"></span>
+            </div>
+            <div class="form-group d-flex justify-content-between align-items-center mt-4">
+                <a asp-action="Index" asp-controller="Pagina" class="btn btn-secondary">Cancelar</a>
+                <input type="button" value="Aceptar" class="btn btn-primary" onclick="Create()" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function Create() {
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    document.getElementById("frm").submit();
+                }
+                else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+    </script>
+}
+

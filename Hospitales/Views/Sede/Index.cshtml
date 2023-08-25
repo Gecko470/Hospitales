@@ -1,0 +1,178 @@
+﻿@model IEnumerable<Hospitales.Clases.SedeCLS>
+
+@{
+    ViewData["Title"] = "Sedes";
+}
+
+<h1>Sedes</h1>
+<hr />
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open()">
+            Nueva
+        </button>
+    </div>
+    <div>
+        <form asp-controller="Sede" asp-action="Index" method="post" class="d-flex justify-content-center" id="frm">
+            <label class="col-form-label me-4">Buscar:</label>
+            <input type="text" class="form form-control" placeholder="Nombre Sede.." name="Nombre" id="txtNombre" value="@ViewBag.Nombre" onkeyup="Buscar()" />
+        </form>
+    </div>
+    <div>
+        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Sedes')" />
+        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Sede','Sedes')" />
+    </div>
+</div>
+
+<form asp-action="Descargar" asp-controller="Sede" id="frmExportar">
+    <table class="table table-striped" id="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Iidsede)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Iidsede" />
+                    <input type="hidden" name="tipo" id="tipo" />
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Nombre" />
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Direccion)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Direccion" />
+                </th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Iidsede)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Direccion)
+                    </td>
+                    <td>
+                        <span data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Edit(@item.Iidsede)"><i class="fa fa-pencil-square-o text-primary me-4" aria-hidden="true"></i></span>
+                        <span onclick="Eliminar(@item.Iidsede)"><i class="fa fa-trash-o text-danger" aria-hidden="true"></i></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+
+<form asp-action="Delete" asp-controller="Sede" method="post" id="frmDelete">
+    <input type="hidden" id="txtDelete" name="idEliminar" />
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Sedes</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" id="Id" />
+                    <label class="control-label">Nombre</label>
+                    <input type="text" id="Nombre" class="form-control limpiar" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Dirección</label>
+                    <input type="text" id="Direccion" class="form-control limpiar" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnClose">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Aceptar</button>
+            </div>
+            <div id="divErrores"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        function Open() {
+            LimpiarModal();
+            document.getElementById("divErrores").innerHTML = "";
+        }
+
+        function LimpiarModal() {
+            document.getElementById("Id").value = "";
+            let controles = document.getElementsByClassName("limpiar");
+            Array.from(controles).forEach((item) => {
+                item.value = "";
+            });
+        }
+
+        function Edit(id) {
+            $.get("/Sede/Edit/?id=" + id, (resp) => {
+                console.log(resp);
+                if (resp != "") {
+                    document.getElementById("Id").value = resp.iidsede;
+                    document.getElementById("Nombre").value = resp.nombre;
+                    document.getElementById("Direccion").value = resp.direccion;
+                }
+            })
+        }
+
+        function Guardar() {
+            let Id = document.getElementById("Id").value * 1;
+            let Nombre = document.getElementById("Nombre").value;
+            let Direccion = document.getElementById("Direccion").value;
+
+            var frm = new FormData();
+            frm.append("Iidsede", Id);
+            frm.append("Nombre", Nombre);
+            frm.append("Direccion", Direccion);
+
+            $.ajax({
+                type: "POST",
+                url: "/Sede/Guardar",
+                data: frm,
+                processData: false,
+                contentType: false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        exito("Guardado correctamente..");
+                        document.getElementById("btnClose").click();
+                        document.getElementById("frm").submit();
+                    }
+                    else {
+                        error();
+                        document.getElementById("divErrores").innerHTML = resp;
+                    }
+                }
+            });
+        }
+
+        function Buscar() {
+            document.getElementById("frm").submit();
+        }
+
+        function Eliminar(id) {
+            document.getElementById("txtDelete").value = id;
+
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    document.getElementById("frmDelete").submit();
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+    </script>
+}
+

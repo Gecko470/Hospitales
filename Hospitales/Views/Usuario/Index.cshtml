@@ -1,0 +1,241 @@
+﻿@using Hospitales.Clases
+@model IEnumerable<UsuarioCLS>
+
+@{
+    ViewData["Title"] = "Usuarios";
+    List<SelectListItem> listaTiposUsuario = ViewBag.listaTiposUsuario;
+    List<SelectListItem> listaPersonas = ViewBag.listaPersonas;
+}
+
+<h1>Usuarios</h1>
+<hr />
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open(0)">
+            Nuevo
+        </button>
+    </div>
+    <div class="d-flex">
+        <label class="col-form-label me-4">Buscar:</label>
+        <input type="text" class="form form-control" placeholder="Nombre Usuario.." name="Nombre" id="txtNombre" value="@ViewBag.Nombre" />
+        <input type="button" value="Buscar" class="btn btn-info ms-4" onclick="Buscar()" />
+        <input type="button" value="Limpiar" class="btn btn-danger ms-2" onclick="limpiar()" />
+    </div>
+    <div>
+        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Especialidades')" />
+        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Especialidad','Especialidades')" />
+    </div>
+</div>
+
+<form asp-action="Descargar" asp-controller="Usuario" id="frmExportar">
+    <table class="table table-striped" id="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(x => x.Iidusuario)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Iidusuario" />
+                    <input type="hidden" name="tipo" id="tipo" />
+                </th>
+                <th>@Html.DisplayNameFor(x => x.NombreCompleto)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="NombreCompleto" /></th>
+                <th>@Html.DisplayNameFor(x => x.Usuario)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Usuario" /></th>
+                <th>@Html.DisplayNameFor(x => x.TipoUsuario)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="TipoUsuario" /></th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+        </tbody>
+    </table>
+</form>
+
+<input type="hidden" id="txtDelete" name="idEliminar" />
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" id="iidusuario" />
+                    <label class="control-label">Nombre Usuario</label>
+                    <input type="text" id="nombreusuario" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Tipo Usuario</label>
+                    <select asp-items="listaTiposUsuario" id="iidtipousuario" class="form-control form-select"></select>
+                </div>
+                <div id="divPass">
+                    <div class="form-group">
+                        <label class="control-label">Password</label>
+                        <input type="password" id="password" class="form-control" />
+                        <span class="text-danger" name="spanPass"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Repetir Password</label>
+                        <input type="password" id="reppassword" class="form-control" />
+                        <span class="text-danger" name="spanPass"></span>
+                    </div>
+                </div>
+                <div class="form-group" id="divPersona">
+                    <label class="control-label">Persona</label>
+                    <select asp-items="listaPersonas" id="iidpersona" class="form-control form-select"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnClose">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Aceptar</button>
+            </div>
+            <div id="divErrores"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        let controller = "Usuario";
+        let action = "Edit";
+        let campos = ["iidusuario", "nombreCompleto", "usuario", "tipoUsuario"];
+
+        window.onload = () => {
+
+            Listar();
+        }
+
+        function Listar() {
+            let url = "/Usuario/Listar";
+            Tabla(url, campos, controller, true);
+        }
+
+        function Buscar() {
+
+            let nombre = document.getElementById("txtNombre").value;
+            let url = "/Usuario/Filtrar/?nombre=" + nombre;
+
+            Tabla(url, campos, controller, true);
+        }
+
+        function limpiar() {
+            document.getElementById("txtNombre").value = '';
+            Listar();
+        }
+
+        function LimpiarModal() {
+            document.getElementById("iidusuario").value = "";
+            let controles = document.getElementsByClassName("form-control");
+            Array.from(controles).forEach((item) => {
+                item.value = "";
+            });
+            let spans = document.getElementsByName("spanPass");
+            Array.from(spans).forEach(item => {
+                item.innerHTML = "";
+            });
+        }
+
+        function Open(id) {
+            LimpiarModal();
+            document.getElementById("divErrores").innerHTML = "";
+
+            if (id == 0) {
+                $("#exampleModalLabel").text("Usuario - Create");
+                document.getElementById("divPersona").style.display = "block";
+                document.getElementById("divPass").style.display = "block";
+            }
+            else {
+                $("#exampleModalLabel").text("Usuario - Edit");
+                document.getElementById("divPersona").style.display = "none";
+                document.getElementById("divPass").style.display = "none";
+                
+            }
+        }
+
+        function Edit(id) {
+            Open(id);
+            $.get("/Usuario/Edit/?id=" + id, (resp) => {
+                console.table(resp);
+                if (resp != "") {
+                    document.getElementById("iidusuario").value = resp.iidusuario;
+                    document.getElementById("nombreusuario").value = resp.nombreusuario;
+                    document.getElementById("iidtipousuario").value = resp.iidtipousuario;
+                    document.getElementById("password").value = resp.contraseña;
+                    document.getElementById("reppassword").value = resp.contraseña;
+                }
+            })
+        }
+
+        function Guardar() {
+            let iidusuario = document.getElementById("iidusuario").value * 1;
+            let nombreusuario = document.getElementById("nombreusuario").value;
+            let iidtipousuario = document.getElementById("iidtipousuario").value;
+            let password = document.getElementById("password").value;
+            let reppassword = document.getElementById("reppassword").value;
+            let iidpersona = document.getElementById("iidpersona").value;
+
+            if (password != reppassword) {
+                let spans = document.getElementsByName("spanPass");
+                Array.from(spans).forEach(item => {
+                    item.innerHTML = "Los password no coinciden..";
+                });
+            }
+            else {
+                var frm = new FormData();
+                frm.append("Iidusuario", iidusuario);
+                frm.append("Iidtipousuario", iidtipousuario);
+                frm.append("Nombreusuario", nombreusuario);
+                frm.append("Contraseña", password);
+                frm.append("Iidpersona", iidpersona);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Usuario/Guardar",
+                    data: frm,
+                    processData: false,
+                    contentType: false,
+                    success: (resp) => {
+                        if (resp == "1") {
+                            exito("Guardado correctamente..");
+                            document.getElementById("btnClose").click();
+                            Listar();
+                        }
+                        else {
+                            error();
+                            document.getElementById("divErrores").innerHTML = resp;
+                        }
+                    }
+                });
+            }
+
+        }
+
+        function Eliminar(id) {
+            // document.getElementById("txtDelete").value = id;
+
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    // document.getElementById("frmDelete").submit();
+                    $.post("/Usuario/Delete", { idEliminar: id }, (resp) => {
+                        if (resp == "1") {
+                            Listar();
+                            exito("Borrado correctamente..");
+                        }
+                        else {
+                            error();
+                        }
+                    });
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+    </script>
+}
+
+

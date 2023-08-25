@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Registro";
+    Layout = null;
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+<div class="col-md-6 m-auto" style="position:relative;top:50%;transform:translateY(-50%)">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:600px;grid-gap:2em">
+
+        <div>
+            <img style="width:100%" src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcT82L50z2IJu1PeMUxuyFLrfkXGDSfTlnZh1i5ZpUTekgrSrbwW&usqp=CAU" />
+        </div>
+        <div>
+            <h3>Registro</h3>
+            <div class="form-group mt-2">
+                <label>Usuario</label>
+                <input type="text" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" class="form-control" />
+            </div>
+            <div class="form-group mt-4">
+                <input type="button" class="btn btn-primary w-100" value="Aceptar" />
+                <a asp-controller="Login" asp-action="Index" class="btn btn-secondary w-100 mt-2">
+                    Login
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>

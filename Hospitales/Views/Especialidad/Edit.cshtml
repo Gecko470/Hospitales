@@ -1,0 +1,51 @@
+﻿@model Hospitales.Clases.EspecialidadCLS
+
+@{
+    ViewData["Title"] = "Especialidades";
+}
+
+<h1>Edit</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Guardar" asp-controller="Especialidad" method="post" id="frm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="Iidespecialidad" type="hidden" id="Iidespecialidad" />
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+                @if (Model != null && Model.Mensaje != "")
+                {
+                    <p class="text-danger">@Model.Mensaje</p>
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="Descripcion" class="control-label"></label>
+                <input asp-for="Descripcion" class="form-control" />
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+            </div>
+            <div class="form-group d-flex justify-content-between align-items-center mt-4">
+                <a asp-action="Index" asp-controller="Especialidad" class="btn btn-secondary">Cancelar</a>
+                <input type="button" onclick="abrirModal()" value="Aceptar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        function abrirModal() {
+            mostrarModal().then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    document.getElementById("frm").submit();
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            })
+        }
+    </script>
+}
+

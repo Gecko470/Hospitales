@@ -1,0 +1,228 @@
+﻿@using Hospitales.Clases
+@model IEnumerable<PacienteCLS>
+
+@{
+    ViewData["Title"] = "Pacientes";
+    List<SelectListItem> listaPersonas = ViewBag.listaPersonas;
+    List<SelectListItem> listaTiposSangre = ViewBag.listaTiposSangre;
+}
+
+<h1>Pacientes</h1>
+<hr />
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open(0)">
+            Nuevo
+        </button>
+    </div>
+    <div class="d-flex">
+        <label class="col-form-label me-4">Buscar:</label>
+        <input type="text" class="form form-control" placeholder="Nombre Paciente.." name="Nombre" id="txtNombre" value="@ViewBag.Nombre" />
+        <input type="button" value="Buscar" class="btn btn-info ms-4" onclick="Buscar()" />
+        <input type="button" value="Limpiar" class="btn btn-danger ms-2" onclick="limpiar()" />
+    </div>
+    <div>
+        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Especialidades')" />
+        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Especialidad','Especialidades')" />
+    </div>
+</div>
+
+<form asp-action="Descargar" asp-controller="Paciente" id="frmExportar">
+    <table class="table table-striped" id="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(x => x.Iidpaciente)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Iidpaciente" />
+                    <input type="hidden" name="tipo" id="tipo" />
+                </th>
+                <th>@Html.DisplayNameFor(x => x.NombreCompleto)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="NombreCompleto" /></th>
+                <th>@Html.DisplayNameFor(x => x.GrupoSanguineo)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="GrupoSanguineo" /></th>
+                <th>@Html.DisplayNameFor(x => x.Alergias)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Alergias" /></th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+        </tbody>
+    </table>
+</form>
+
+<input type="hidden" id="txtDelete" name="idEliminar" />
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" id="iidpaciente" />
+                    <label class="control-label">Grupo Sanguíneo</label>
+                    @Html.DropDownList("iidtiposangre", listaTiposSangre, new { @class = "form-control form-select"})
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Alergias</label>
+                    <input type="text" id="alergias" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Enferm. Crónicas</label>
+                    <input type="text" id="enfermCronicas" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Vacunas</label>
+                    <input type="text" id="vacunas" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Anteced. Quirúrgicos</label>
+                    <input type="text" id="antecedQuirurg" class="form-control" />
+                </div>
+                <div class="form-group" id="divPersona">
+                    <label class="control-label">Persona</label>
+                    @Html.DropDownList("iidpersona", listaPersonas, new { @class = "form-control form-select"})
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnClose">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Aceptar</button>
+            </div>
+            <div id="divErrores"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        let controller = "Paciente";
+        let action = "Edit";
+        let campos = ["iidpaciente", "nombreCompleto", "grupoSanguineo", "alergias"];
+
+        window.onload = () => {
+
+            Listar();
+        }
+
+        function Listar() {
+            let url = "/Paciente/Listar";
+            Tabla(url, campos, controller, true);
+        }
+
+        function Buscar() {
+
+            let nombre = document.getElementById("txtNombre").value;
+            let url = "/Paciente/Filtrar/?nombre=" + nombre;
+
+            Tabla(url, campos, controller, true);
+        }
+
+        function limpiar() {
+            document.getElementById("txtNombre").value = '';
+            Listar();
+        }
+
+        function LimpiarModal() {
+            document.getElementById("iidpaciente").value = "";
+            let controles = document.getElementsByClassName("form-control");
+            Array.from(controles).forEach((item) => {
+                item.value = "";
+            });
+        }
+
+        function Open(id) {
+            LimpiarModal();
+            document.getElementById("divErrores").innerHTML = "";
+
+            if (id == 0) {
+                $("#exampleModalLabel").text("Paciente - Create");
+                document.getElementById("divPersona").style.display = "block";
+            }
+            else {
+                $("#exampleModalLabel").text("Paciente - Edit");
+                document.getElementById("divPersona").style.display = "none";
+            }
+        }
+
+        function Edit(id) {
+            Open(id);
+
+            $.get("/Paciente/Edit/?id=" + id, (resp) => {
+                console.table(resp);
+                if (resp != "") {
+                    document.getElementById("iidpaciente").value = resp.iidpaciente;
+                    document.getElementById("iidtiposangre").value = resp.iidtiposangre;
+                    document.getElementById("alergias").value = resp.alergias;
+                    document.getElementById("enfermCronicas").value = resp.enfermedadescronicas;
+                    document.getElementById("vacunas").value = resp.cuadrovacunas;
+                    document.getElementById("antecedQuirurg").value = resp.antecedentesquirurgicos;
+                    document.getElementById("iidpersona").value = resp.iidpersona;
+                }
+            })
+        }
+
+        function Guardar() {
+            let iidpaciente = document.getElementById("iidpaciente").value * 1;
+            let iidtiposangre = document.getElementById("iidtiposangre").value;
+            let alergias = document.getElementById("alergias").value;
+            let enfermCronicas = document.getElementById("enfermCronicas").value;
+            let vacunas = document.getElementById("vacunas").value;
+            let antecedQuirurg = document.getElementById("antecedQuirurg").value;
+            let iidpersona = document.getElementById("iidpersona").value;
+
+            var frm = new FormData();
+            frm.append("Iidpaciente", iidpaciente);
+            frm.append("Iidtiposangre", iidtiposangre);
+            frm.append("Alergias", alergias);
+            frm.append("Enfermedadescronicas", enfermCronicas);
+            frm.append("Cuadrovacunas", vacunas);
+            frm.append("Antecedentesquirurgicos", antecedQuirurg);
+            frm.append("Iidpersona", iidpersona);
+
+            $.ajax({
+                type: "POST",
+                url: "/Paciente/Guardar",
+                data: frm,
+                processData: false,
+                contentType: false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        exito("Guardado correctamente..");
+                        document.getElementById("btnClose").click();
+                        Listar();
+                    }
+                    else {
+                        error();
+                        document.getElementById("divErrores").innerHTML = resp;
+                    }
+                }
+            });
+        }
+
+        function Eliminar(id) {
+
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+
+                    $.post("/Paciente/Delete", { idEliminar: id }, (resp) => {
+                        if (resp == "1") {
+                            Listar();
+                            exito("Borrado correctamente..");
+                        }
+                        else {
+                            error();
+                        }
+                    });
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+    </script>
+}
+
+

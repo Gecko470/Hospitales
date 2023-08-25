@@ -1,0 +1,102 @@
+﻿@using Hospitales.Clases
+@model IEnumerable<EspecialidadCLS>
+
+@{
+    ViewData["Title"] = "Especialidades";
+}
+
+<h1>Especialidades</h1>
+<hr />
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <a class="btn btn-primary my-3" asp-controller="Especialidad" asp-action="Create">Nueva</a>
+    </div>
+    <div class="d-flex">
+        <label class="col-form-label me-4">Buscar:</label>
+        <input type="text" class="form form-control" placeholder="Nombre Especialidad.." name="Nombre" id="txtNombre" value="@ViewBag.Nombre" />
+        <input type="button" value="Buscar" class="btn btn-info ms-4" onclick="Buscar()" />
+        <input type="button" value="Limpiar" class="btn btn-danger ms-2" onclick="limpiar()" />
+    </div>
+    <div>
+        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Especialidades')" />
+        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Especialidad','Especialidades')" />
+    </div>
+</div>
+
+<form asp-action="Descargar" asp-controller="Especialidad" id="frmExportar">
+    <table class="table table-striped" id="table">
+        <thead>
+            <tr>
+                <th style="width: 50px;">
+                    @Html.DisplayNameFor(x => x.Iidespecialidad)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Iidespecialidad" />
+                    <input type="hidden" name="tipo" id="tipo" />
+                </th>
+                <th>@Html.DisplayNameFor(x => x.Nombre)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Nombre" /></th>
+                <th>@Html.DisplayNameFor(x => x.Descripcion)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Descripcion" /></th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tbody">
+        </tbody>
+    </table>
+</form>
+
+<input type="hidden" id="txtDelete" name="idEliminar" />
+
+@section Scripts{
+    <script>
+        let controller = "Especialidad";
+        let action = "Edit";
+        let campos = ["iidespecialidad", "nombre", "descripcion"];
+
+        window.onload = () => {
+
+            Listar();
+        }
+
+        function Listar() {
+            let url = "/Especialidad/Listar";
+            Tabla(url, campos, controller);
+        }
+
+        function Buscar() {
+
+            let nombre = document.getElementById("txtNombre").value;
+            let url = "/Especialidad/Filtrar/?nombre=" + nombre;
+
+            Tabla(url, campos, controller);
+        }
+
+        function limpiar() {
+            document.getElementById("txtNombre").value = '';
+            Buscar();
+        }
+
+        function Eliminar(id) {
+            // document.getElementById("txtDelete").value = id;
+
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    // document.getElementById("frmDelete").submit();
+                    $.post("/Especialidad/Delete", { idEliminar: id }, (resp) => {
+                        if (resp == 1) {
+                            Listar();
+                            exito("Borrado correctamente..");
+                        }
+                        else {
+                            error();
+                        }
+                    });
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+    </script>
+}
+

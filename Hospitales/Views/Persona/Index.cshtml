@@ -1,0 +1,266 @@
+﻿@using Hospitales.Clases
+@model IEnumerable<PersonaCLS>
+@{
+    ViewData["Title"] = "Personas";
+    List<SelectListItem> listaSexos = ViewBag.Sexos;
+}
+
+<h1>Personas</h1>
+<hr />
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open(0)">
+            Nueva
+        </button>
+    </div>
+    <div class="w-50 d-flex align-items-center">
+
+        <label class="me-4">Sexo:</label>
+        @Html.DropDownList("Iidsexo", listaSexos, new{ @class = "form form-select"})
+        <input type="button" value="Buscar" class="btn btn-info ms-4" onclick="Buscar()" />
+        <input type="button" value="Limpiar" class="btn btn-danger ms-2" onclick="limpiar()" />
+
+    </div>
+    <div>
+        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Personas')" />
+        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Persona','Personas')" />
+    </div>
+</div>
+
+<form asp-action="Descargar" asp-controller="Persona" id="frmExportar">
+    <table class="table table-striped" id="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(x => x.Iidpersona)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Iidpersona" />
+                    <input type="hidden" name="tipo" id="tipo" />
+                </th>
+                <th>@Html.DisplayNameFor(x => x.NombreCompleto)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="NombreCompleto" /></th>
+                <th>@Html.DisplayNameFor(x => x.Email)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Email" /></th>
+                <th>@Html.DisplayNameFor(x => x.FechaNtoString)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="FechaNtoString" /></th>
+                <th>@Html.DisplayNameFor(x => x.NombreSexo)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="NombreSexo" /></th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tbody"></tbody>
+    </table>
+</form>
+<input type="hidden" id="txtDelete" name="idEliminar" />
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" id="Id" />
+                    <label class="control-label">Nombre</label>
+                    <input type="text" id="Nombre" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Ap. Paterno</label>
+                    <input type="text" id="apPaterno" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Ap. Materno</label>
+                    <input type="text" id="apMaterno" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Email</label>
+                    <input type="text" id="Email" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Dirección</label>
+                    <input type="text" id="Direccion" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Tel. Fijo</label>
+                    <input type="text" id="TelFijo" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Tel. Móvil</label>
+                    <input type="text" id="TelMovil" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Fecha Nto.</label>
+                    <input type="text" id="FechaNto" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Sexo</label>
+                    <select asp-items="listaSexos" id="IdSexo" class="form-control form-select"></select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label d-block">Imagen</label>
+                    <img src="" width="150" height="150" id="img" />
+                    <input type="file" id="inpFoto" onchange="SeleccionarImg()" accept="image/*" class="form-control mt-2"/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnClose">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="Guardar()">Aceptar</button>
+            </div>
+            <div id="divErrores"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        let controller = "Persona";
+        let campos = ["iidpersona", "nombreCompleto", "email", "fechaNtoString", "nombreSexo"];
+
+        $(function () {
+            $("#FechaNto").datepicker({ dateFormat: "dd-mm-yy", changeMonth: true, changeYear: true, yearRange: "1930:2012" });
+        });
+
+        window.onload = () => {
+            Listar();
+        }
+
+        function SeleccionarImg() {
+            let inpFoto = document.getElementById("inpFoto").files[0];
+            let reader = new FileReader();
+
+            reader.onloadend = () => {
+                document.getElementById("img").src = reader.result;
+            }
+            reader.readAsDataURL(inpFoto);
+        }
+
+        function Listar() {
+            let url = "/Persona/Listar";
+            Tabla(url, campos, controller, true);
+        }
+
+        function Buscar() {
+
+            let Iidsexo = document.getElementById("Iidsexo").value;
+            let url = "/Persona/Filtrar/?Iidsexo=" + Iidsexo;
+
+            Tabla(url, campos, controller, true);
+        }
+
+        function limpiar() {
+            document.getElementById("Iidsexo").value = "";
+            Listar();
+        }
+
+        function LimpiarModal() {
+            document.getElementById("Id").value = "";
+            document.getElementById("img").src = "";
+            let controles = document.getElementsByClassName("form-control");
+            Array.from(controles).forEach((item) => {
+                item.value = "";
+            });
+        }
+
+        function Open(id) {
+            LimpiarModal();
+            document.getElementById("divErrores").innerHTML = "";
+
+            if (id == 0) {
+                $("#exampleModalLabel").text("Persona - Create");
+            }
+            else {
+                $("#exampleModalLabel").text("Persona - Edit");
+            }
+        }
+
+        function Edit(id) {
+            Open();
+
+            $.get("/Persona/Edit/?id=" + id, (resp) => {
+                console.table(resp);
+                if (resp != "") {
+                    document.getElementById("Id").value = resp.iidpersona;
+                    document.getElementById("Nombre").value = resp.nombre;
+                    document.getElementById("apPaterno").value = resp.appaterno;
+                    document.getElementById("apMaterno").value = resp.apmaterno;
+                    document.getElementById("Email").value = resp.email;
+                    document.getElementById("Direccion").value = resp.direccion;
+                    document.getElementById("TelFijo").value = resp.telefonofijo;
+                    document.getElementById("TelMovil").value = resp.telefonocelular;
+                    document.getElementById("FechaNto").value = resp.fechaNtoString;
+                    document.getElementById("IdSexo").value = resp.iidsexo;
+                    document.getElementById("img").src = resp.foto;
+                }
+            })
+        }
+
+        function Guardar() {
+            let Id = document.getElementById("Id").value * 1;
+            let Nombre = document.getElementById("Nombre").value;
+            let apPaterno = document.getElementById("apPaterno").value;
+            let apMaterno = document.getElementById("apMaterno").value;
+            let Email = document.getElementById("Email").value;
+            let Direccion = document.getElementById("Direccion").value;
+            let TelFijo = document.getElementById("TelFijo").value;
+            let TelMovil = document.getElementById("TelMovil").value;
+            let FechaNto = document.getElementById("FechaNto").value;
+            let IdSexo = document.getElementById("IdSexo").value;
+            let Foto = document.getElementById("img").src;
+
+            var frm = new FormData();
+            frm.append("Iidpersona", Id);
+            frm.append("Nombre", Nombre);
+            frm.append("Appaterno", apPaterno);
+            frm.append("Apmaterno", apMaterno);
+            frm.append("Email", Email);
+            frm.append("Direccion", Direccion);
+            frm.append("Telefonofijo", TelFijo);
+            frm.append("Telefonocelular", TelMovil);
+            frm.append("FechaNtoString", FechaNto);
+            frm.append("Iidsexo", IdSexo);
+            frm.append("Foto", Foto);
+
+            $.ajax({
+                type: "POST",
+                url: "/Persona/Guardar",
+                data: frm,
+                processData: false,
+                contentType: false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        exito("Guardado correctamente..");
+                        document.getElementById("btnClose").click();
+                        Listar();
+                    }
+                    else {
+                        error();
+                        document.getElementById("divErrores").innerHTML = resp;
+                    }
+                }
+            });
+        }
+
+        function Eliminar(id) {
+            document.getElementById("txtDelete").value = id;
+
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    $.post("/Persona/Delete", { idEliminar: id }, (resp) => {
+                        if (resp == 1) {
+                            exito("Borrado correctamente..");
+                            Listar();
+                        }
+                        else {
+                            error();
+                        }
+                    });
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+    </script>
+}

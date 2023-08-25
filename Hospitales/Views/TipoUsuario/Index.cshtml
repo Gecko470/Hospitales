@@ -1,0 +1,96 @@
+﻿@model IEnumerable<Hospitales.Clases.TipoUsuarioCLS>
+
+@{
+    ViewData["Title"] = "Tipos Usuario";
+}
+
+<h1>Tipos Usuario</h1>
+<hr />
+
+<form asp-controller="TipoUsuario" asp-action="Index">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a asp-action="Create" asp-controller="TipoUsuario" class="btn btn-primary">Nuevo</a>
+        <input type="submit" value="Buscar" class="btn btn-info mb-2" />
+    </div>
+    
+    <table class="table table-striped" id="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Iidtipousuario)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Descripcion)
+                </th>
+                <th></th>
+            </tr>
+
+            <tr>
+                <th>
+                    @if(ViewBag.Iidtipousuario == 0)
+                    {
+                        <input type="number" name="Iidtipousuario" class="from form-control" placeholder="Id.." />
+                    }
+                    else
+                    {
+                        <input type="number" name="Iidtipousuario" class="from form-control" value="@ViewBag.Iidtipousuario" placeholder="Id.." />
+                    }
+                </th>
+                <th>
+                    <input type="text" name="Nombre" class="from form-control" value="@ViewBag.Nombre" placeholder="Nombre.." />
+                </th>
+                <th>
+                    <input type="text" name="Descripcion" class="from form-control" value="@ViewBag.Descripcion" placeholder="Descripción.." />
+                </th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Iidtipousuario)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Descripcion)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-asp-controller="TipoUsuario" asp-route-id="@item.Iidtipousuario"><i class="fa fa-pencil-square-o text-primary me-4" aria-hidden="true"></i></a>
+                        <span onclick="Eliminar(@item.Iidtipousuario)"><i class="fa fa-trash-o text-danger" aria-hidden="true"></i></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+<form asp-action="Delete" asp-controller="TipoUsuario" method="post" id="frmDelete">
+    <input type="hidden" id="txtDelete" name="idEliminar" />
+</form>
+
+@section Scripts{
+    <script>
+
+        function Eliminar(id) {
+            document.getElementById("txtDelete").value = id;
+
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    document.getElementById("frmDelete").submit();
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+    </script>
+}
+
+

@@ -1,0 +1,68 @@
+﻿@model Hospitales.Clases.TipoUsuarioCLS
+
+@{
+    ViewData["Title"] = "Tipos Usuario";
+}
+
+<h1>Create</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+            <div class="form-group">
+                <label class="control-label">Nombre</label>
+                <input id ="Nombre" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Descripción</label>
+                <input id = "Descripcion" class="form-control" />
+            </div>
+            <div class="form-group d-flex justify-content-between align-items-center mt-4">
+                <a asp-action="Index" asp-controller="TipoUsuario" class="btn btn-secondary">Cancelar</a>
+                <input type="button" value="Aceptar" class="btn btn-primary" onclick="Enviar()" />
+            </div>
+            <div id="divErrores"></div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function Enviar() {
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    Guardar();
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+        function Guardar() {
+            let Nombre = document.getElementById("Nombre").value;
+            let Descripcion = document.getElementById("Descripcion").value;
+
+            let frm = new FormData();
+            frm.append("Nombre", Nombre);
+            frm.append("Descripcion", Descripcion);
+
+            $.ajax({
+                type: "POST",
+                url: "/TipoUsuario/Guardar",
+                data: frm,
+                processData: false,
+                contentType : false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        exito("Guardado correctamente..");
+                        window.location = "/TipoUsuario/Index";
+                    }
+                    else {
+                        error();
+                        document.getElementById("divErrores").innerHTML = resp;
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+

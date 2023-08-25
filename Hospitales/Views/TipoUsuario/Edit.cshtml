@@ -1,0 +1,123 @@
+﻿@model Hospitales.Clases.TipoUsuarioCLS
+
+@{
+    ViewData["Title"] = "Tipos Usuario";
+}
+
+<h1>Edit</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <input type="hidden" asp-for="Iidtipousuario" id="Iidtipousuario" />
+        <div class="form-group">
+            <label asp-for="Nombre" class="control-label"></label>
+            <input asp-for="Nombre" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Descripcion" class="control-label"></label>
+            <input asp-for="Descripcion" class="form-control" />
+        </div>
+        <div id="divErrores"></div>
+        <div id="divPaginas"></div>
+        <div class="form-group d-flex justify-content-between align-items-center mt-4">
+            <a asp-action="Index" asp-controller="TipoUsuario" class="btn btn-secondary">Cancelar</a>
+            <input type="button" value="Aceptar" class="btn btn-primary" onclick="Enviar()" />
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        window.onload = () => {
+            listarPaginas();
+        }
+
+        function listarPaginas() {
+            let contenido = "";
+
+            $.get("/Pagina/listar", (resp) => {
+                if (resp != null) {
+                    contenido += "<table class = 'table table-striped'>";
+                    contenido += "<thead>";
+                    contenido += "<tr>";
+                    contenido += "<th>Mensaje</th><th>Accion</th><th>Controlador</th><th></th>";
+                    contenido += "</tr>";
+                    contenido += "</thead>";
+                    contenido += "<tbody>";
+                    resp.forEach((item) => {
+                        contenido += "<tr>";
+                        contenido += `<td>${item.mensaje}</td><td>${item.accion}</td><td>${item.controlador}</td><td><input type='checkbox' class = 'check' id = 'chk${item.iidpagina}' /></td>`;
+                        contenido += "</tr>";
+                    });
+                    contenido += "</tbody>";
+                    contenido += "</table>";
+
+                    document.getElementById("divPaginas").innerHTML = contenido;
+
+                    ObtenerPaginas();
+                }
+            });
+        }
+
+        function Enviar() {
+            mostrarModal().then(result => {
+                if (result.isConfirmed) {
+                    Guardar();
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+        function Guardar() {
+            let Iidtipousuario = document.getElementById("Iidtipousuario").value;
+            let Nombre = document.getElementById("Nombre").value;
+            let Descripcion = document.getElementById("Descripcion").value;
+            let checks = document.getElementsByClassName("check");
+
+            let frm = new FormData();
+            frm.append("Iidtipousuario", Iidtipousuario);
+            frm.append("Nombre", Nombre);
+            frm.append("Descripcion", Descripcion);
+
+            Array.from(checks).forEach(item => {
+                if (item.checked == true) {
+                    frm.append("idPaginas[]", item.id.replace("chk", "") * 1);
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/TipoUsuario/Guardar",
+                data: frm,
+                processData: false,
+                contentType: false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        window.location = "/TipoUsuario/Index";
+                        exito("Guardado correctamente..");
+                    }
+                    else {
+                        error();
+                        document.getElementById("divErrores").innerHTML = resp;
+                    }
+                }
+            });
+        }
+
+        function ObtenerPaginas() {
+            let id = document.getElementById("Iidtipousuario").value;
+
+            $.get("/TipoUsuario/ObtenerPaginas/?id=" + id, (resp) => {
+                console.table(resp);
+                resp.forEach(item => {
+                    let idcheck = "chk"+item.iidpagina;
+                    document.getElementById(idcheck).checked = true;
+                });
+            });
+        }
+
+    </script>
+}
+
