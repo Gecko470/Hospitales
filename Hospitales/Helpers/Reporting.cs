@@ -170,8 +170,6 @@ namespace Hospitales.Helpers
 
                 return ms.ToArray();
             }
-
-            return null;
         }
     }
 }

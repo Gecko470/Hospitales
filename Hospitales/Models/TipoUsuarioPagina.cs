@@ -14,7 +14,7 @@ namespace Hospitales.Models
         public int? Iidtipousuario { get; set; }
         public int? Iidpagina { get; set; }
         public int? Bhabilitado { get; set; }
-        public int? Iidvista { get; set; }
+        public int Iidvista { get; set; }
 
         public virtual Pagina? IidpaginaNavigation { get; set; }
         public virtual TipoUsuario? IidtipousuarioNavigation { get; set; }

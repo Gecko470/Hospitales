@@ -23,6 +23,10 @@ namespace Hospitales.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            string controlador = ControllerContext.ActionDescriptor.ControllerName;
+            List<PaginaCLS> listaBotonesPag = Listas.listarBotones(controlador);
+            ViewBag.Botones = listaBotonesPag.Select(x => x.iidBoton).ToList();
+
             await tiposUsuario();
             await paginas();
 

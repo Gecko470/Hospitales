@@ -27,10 +27,10 @@ namespace Hospitales.Clases
         public int Iidtipousuario { get; set; }
         [Required(ErrorMessage = "El campo {0} es obligatorio..")]
         [DisplayName("Nombre Usuario")]
-        public string? Nombreusuario { get; set; }
+        public string Nombreusuario { get; set; }
         [Required(ErrorMessage = "El campo {0} es obligatorio..")]
         [DisplayName("Password")]
-        public string? Contraseña { get; set; }
+        public string Contraseña { get; set; }
         public int? Bhabilitado { get; set; }
         [DisplayName("Persona")]
         public int? Iidpersona { get; set; }

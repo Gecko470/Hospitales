@@ -18,5 +18,7 @@ namespace Hospitales.Clases
 
         //ADICIONAMOS
         public string ErrorMensaje { get; set; }
+        public int iidBoton { get; set; }
+        public int iidVista { get; set; }
     }
 }

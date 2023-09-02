@@ -1,8 +1,29 @@
-﻿@{
+﻿@using Hospitales.Clases
+@model RegistroCLS
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container">
+    <h3 class="display-4 mt-4">Bienvenido <span class="text-primary">@Model.Nombreusuario</span> ..</h3>
+    <hr />
+    <div style="display: flex; align-items: center; gap: 100px; margin-top: 30px">
+        <div>
+            <p>Tipo Usuario: @Model.nombreTipoUsuario</p>
+            <hr />
+            <p>Nombre: @Model.Nombre @Model.Appaterno @Model.Apmaterno</p>
+            <hr />
+            <p>Dirección: @Model.Direccion</p>
+            <hr />
+            <p>Email: @Model.Email</p>
+            <hr />
+            <p>Teléf. : @Model.Telefonofijo - @Model.Telefonocelular</p>
+            <hr />
+            <p>Fecha Nto.: @Model.FechaNtoString</p>
+        </div>
+        <div>
+            <img width="300" src="@Model.Foto" />
+        </div>
+    </div>
 </div>
+$

@@ -22,19 +22,9 @@ namespace Hospitales.Controllers
         }
         public IActionResult Index(string nombre)
         {
-            //List<EspecialidadCLS> lista = new List<EspecialidadCLS>();
-
-            //lista = await (from especialidad in context.Especialidads
-            //               where especialidad.Bhabilitado == 1
-            //               select new EspecialidadCLS()
-            //               {
-            //                   Iidespecialidad = especialidad.Iidespecialidad,
-            //                   Nombre = especialidad.Nombre,
-            //                   Descripcion = especialidad.Descripcion
-            //               }).ToListAsync();
-
-
-            //listaEspicialidades = lista;
+            string controlador = ControllerContext.ActionDescriptor.ControllerName;
+            List<PaginaCLS> listaBotonesPag = Listas.listarBotones(controlador);
+            ViewBag.Botones = listaBotonesPag.Select(x => x.iidBoton).ToList();
             return View();
         }
 

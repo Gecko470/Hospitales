@@ -95,7 +95,7 @@ function DescargarPDF(controller, titulo) {
     });
 }*/
 
-function Tabla(url, campos, controller, modal = false) {
+function Tabla(url, campos, controller, modal = false, editar, eliminar) {
     let tbody = document.getElementById("tbody");
     let contenido = "";
 
@@ -108,16 +108,47 @@ function Tabla(url, campos, controller, modal = false) {
             });
 
             if (modal == false) {
-                contenido += `<td>
+                if (editar == "1" && eliminar == "1") {
+                    contenido += `<td>
                           <a href = '/${controller}/Edit/${item[campos[0]]}'><i class='fa fa-pencil-square-o text-primary' aria-hidden='true'></i></a>
                           <span onclick='Eliminar(${item[campos[0]]})'><i class='fa fa-trash-o text-danger' aria-hidden='true'></i></span>
                           </td>`;
+                }
+                else if (editar == "1" && eliminar == "0") {
+                    contenido += `<td>
+                          <a href = '/${controller}/Edit/${item[campos[0]]}'><i class='fa fa-pencil-square-o text-primary' aria-hidden='true'></i></a>
+                          </td>`;
+                }
+                else if (editar == "0" && eliminar == "1") {
+                    contenido += `<td>
+                          <span onclick='Eliminar(${item[campos[0]]})'><i class='fa fa-trash-o text-danger' aria-hidden='true'></i></span>
+                          </td>`;
+                }
+                else if (editar == "0" && eliminar == "0") {
+                     contenido += `<td></td>`;
+                }
+                
             }
             else {
-                 contenido += `<td>
+                 if (editar == "1" && eliminar == "1") {
+                    contenido += `<td>
                           <span onclick='Edit(${item[campos[0]]})' data-bs-toggle="modal" data-bs-target="#exampleModal"><i class='fa fa-pencil-square-o text-primary' aria-hidden='true'></i></span>
                           <span onclick='Eliminar(${item[campos[0]]})'><i class='fa fa-trash-o text-danger' aria-hidden='true'></i></span>
                           </td>`;
+                }
+                else if (editar == "1" && eliminar == "0") {
+                   contenido += `<td>
+                          <span onclick='Edit(${item[campos[0]]})' data-bs-toggle="modal" data-bs-target="#exampleModal"><i class='fa fa-pencil-square-o text-primary' aria-hidden='true'></i></span>
+                          </td>`;
+                }
+                else if (editar == "0" && eliminar == "1") {
+                   contenido += `<td>
+                          <span onclick='Eliminar(${item[campos[0]]})'><i class='fa fa-trash-o text-danger' aria-hidden='true'></i></span>
+                          </td>`;
+                }
+                else if (editar == "0" && eliminar == "0") {
+                     contenido += `<td> </td>`;
+                }
             }
            
             contenido += "</tr>"

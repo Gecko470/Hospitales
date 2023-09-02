@@ -2,70 +2,110 @@
 
 @{
     ViewData["Title"] = "Páginas";
+    List<int> botones = ViewBag.Botones;
 }
 
 <h1>Páginas</h1>
 <hr />
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <div>
-        <a asp-action="Create" asp-controller="Pagina" class="btn btn-primary">Nueva</a>
-    </div>
+    @if (botones != null && botones.Contains(1))
+    {
+        <div>
+            <a asp-action="Create" asp-controller="Pagina" class="btn btn-primary">Nueva</a>
+        </div>
+    }
     <div class="d-flex align-items-center">
-            <label class="me-4">Buscar:</label>
-            <input type="text" value="@ViewBag.Mensaje" class="form form-control" name="mensaje" id="txtMensaje" placeholder="Mensaje.." />
-            <input type="button" value="Buscar" class="btn btn-info ms-4" onclick="Buscar()" />
-            <input type="button" value="Limpiar" class="btn btn-danger ms-2" onclick="limpiar()" />
+        <label class="me-4">Buscar:</label>
+        <input type="text" value="@ViewBag.Mensaje" class="form form-control" name="mensaje" id="txtMensaje" placeholder="Mensaje.." />
+        <input type="button" value="Buscar" class="btn btn-info ms-4" onclick="Buscar()" />
+        <input type="button" value="Limpiar" class="btn btn-danger ms-2" onclick="limpiar()" />
     </div>
     <div>
-        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
-        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
-        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
-        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Páginas')" />
-        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Pagina','Páginas')" />
+        @if (botones != null && botones.Contains(4))
+        {
+            <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        }
+
+        @if (botones != null && botones.Contains(5))
+        {
+            <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        }
+
+        @if (botones != null && botones.Contains(6))
+        {
+            <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        }
+        @if (botones != null && botones.Contains(7))
+        {
+            <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Paginas')" />
+        }
+        @if (botones != null && botones.Contains(1007))
+        {
+            <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Pagina','Paginas')" />
+        }
     </div>
 </div>
 
 <form asp-action="Descargar" asp-controller="Pagina" id="frmExportar">
-<table class="table table-striped" id="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Iidpagina)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Iidpagina" />
-                <input type="hidden" name="tipo" id="tipo" />
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Mensaje)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Mensaje" />
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Accion)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Accion" />
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Controlador)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Controlador" />
-            </th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody id="tbody">
-    
-    </tbody>
-</table>
+    <table class="table table-striped" id="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Iidpagina)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Iidpagina" />
+                    <input type="hidden" name="tipo" id="tipo" />
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Mensaje)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Mensaje" />
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Accion)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Accion" />
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Controlador)<input type="checkbox" class="ms-1 trCheck" checked name="nombrePropiedades" value="Controlador" />
+                </th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
 </form>
 <form asp-action="Delete" asp-controller="Pagina" method="post" id="frmDelete">
     <input type="hidden" id="txtDelete" name="idEliminar" />
 </form>
 
+@if (botones != null && botones.Contains(2))
+{
+    <input id="editar" type="hidden" value="1" />
+}
+else
+{
+    <input id="editar" type="hidden" value="0" />
+}
+@if (botones != null && botones.Contains(3))
+{
+    <input id="eliminar" type="hidden" value="1" />
+}
+else
+{
+    <input id="eliminar" type="hidden" value="0" />
+}
+
 @section Scripts{
     <script>
         let controller = "Pagina";
         let campos = ["iidpagina", "mensaje", "accion", "controlador"];
-
+        let editar = document.getElementById("editar").value;
+        let eliminar = document.getElementById("eliminar").value;
+  
         window.onload = () => {
             Listar();
+            console.log(editar, eliminar);
         }
 
         function Listar() {
             let url = "/Pagina/Listar";
-            Tabla(url, campos, controller);
+            Tabla(url, campos, controller, false, editar, eliminar);
         }
 
         function Buscar() {
@@ -73,7 +113,7 @@
             let txtMensaje = document.getElementById("txtMensaje").value;
             let url = "/Pagina/Listar/?mensaje=" + txtMensaje;
 
-            Tabla(url, campos, controller);
+            Tabla(url, campos, controller, false, editar, eliminar);
         }
         function limpiar() {
             document.getElementById("txtMensaje").value = '';

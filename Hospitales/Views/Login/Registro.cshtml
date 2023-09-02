@@ -1,32 +1,172 @@
 ﻿@{
     ViewData["Title"] = "Registro";
     Layout = null;
+    List<SelectListItem> listaSexos = ViewBag.Sexos;
 }
 <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
-<div class="col-md-6 m-auto" style="position:relative;top:50%;transform:translateY(-50%)">
+<link href="~/lib/jquery-ui-1.13.2/jquery-ui.min.css" rel="stylesheet" />
+<link href="~/lib/jquery-ui-1.13.2/jquery-ui.structure.min.css" rel="stylesheet" />
+<link href="~/lib/jquery-ui-1.13.2/jquery-ui.theme.min.css" rel="stylesheet" />
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:600px;grid-gap:2em">
+<div class="col-md-6 m-auto" style="position:relative;top:5%;">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1200px;grid-gap:2em;">
 
         <div>
             <img style="width:100%" src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcT82L50z2IJu1PeMUxuyFLrfkXGDSfTlnZh1i5ZpUTekgrSrbwW&usqp=CAU" />
         </div>
         <div>
             <h3>Registro</h3>
-            <div class="form-group mt-2">
-                <label>Usuario</label>
-                <input type="text" class="form-control" />
+            <div class="form-group">
+                <input type="hidden" id="Id" />
+                <label class="control-label">Nombre</label>
+                <input type="text" id="Nombre" class="form-control" />
             </div>
             <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" class="form-control" />
+                <label class="control-label">Ap. Paterno</label>
+                <input type="text" id="apPaterno" class="form-control" />
             </div>
-            <div class="form-group mt-4">
-                <input type="button" class="btn btn-primary w-100" value="Aceptar" />
+            <div class="form-group">
+                <label class="control-label">Ap. Materno</label>
+                <input type="text" id="apMaterno" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Email</label>
+                <input type="text" id="Email" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Dirección</label>
+                <input type="text" id="Direccion" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Tel. Fijo</label>
+                <input type="text" id="TelFijo" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Tel. Móvil</label>
+                <input type="text" id="TelMovil" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Fecha Nto.</label>
+                <input type="text" id="FechaNto" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Sexo</label>
+                <select asp-items="listaSexos" id="IdSexo" class="form-control form-select"></select>
+            </div>
+            <div class="form-group">
+                <label class="control-label d-block">Imagen</label>
+                <img src="" width="150" height="150" id="img" />
+                <input type="file" id="inpFoto" onchange="SeleccionarImg()" accept="image/*" class="form-control mt-2" />
+            </div>
+            <div class="form-group">
+                <input type="hidden" id="iidusuario" />
+                <label class="control-label">Nombre Usuario</label>
+                <input type="text" id="nombreusuario" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Password</label>
+                <input type="password" id="password" class="form-control" />
+                <span class="text-danger" name="spanPass"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Repetir Password</label>
+                <input type="password" id="reppassword" class="form-control" />
+                <span class="text-danger" name="spanPass"></span>
+            </div>
+            <div id="divErrores"></div>
+            <div class="form-group mt-4 mb-4">
+                <input type="button" class="btn btn-primary w-100" value="Aceptar" onclick="Guardar()" />
                 <a asp-controller="Login" asp-action="Index" class="btn btn-secondary w-100 mt-2">
                     Login
                 </a>
             </div>
         </div>
     </div>
-
 </div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-ui-1.13.2/jquery-ui.min.js"></script>
+<script src="~/js/site.js"></script>
+<script src="~/js/sweetalert2.min.js"></script>
+
+<script>
+    let spans = document.getElementsByName("spanPass");
+
+    $(function () {
+        $("#FechaNto").datepicker({ dateFormat: "dd-mm-yy", changeMonth: true, changeYear: true, yearRange: "1930:2012" });
+    });
+
+    function SeleccionarImg() {
+        let inpFoto = document.getElementById("inpFoto").files[0];
+        let reader = new FileReader();
+
+        reader.onloadend = () => {
+            document.getElementById("img").src = reader.result;
+        }
+        reader.readAsDataURL(inpFoto);
+    }
+
+    function Guardar() {
+        let password = document.getElementById("password").value;
+        let reppassword = document.getElementById("reppassword").value;
+
+        if (password != reppassword) {
+            Array.from(spans).forEach(item => {
+                item.innerHTML = "Los password no coinciden..";
+            });
+        }
+        else {
+            Array.from(spans).forEach(item => {
+                item.innerHTML = "";
+            });
+
+            let Id = document.getElementById("Id").value * 1;
+            let Nombre = document.getElementById("Nombre").value;
+            let apPaterno = document.getElementById("apPaterno").value;
+            let apMaterno = document.getElementById("apMaterno").value;
+            let Email = document.getElementById("Email").value;
+            let Direccion = document.getElementById("Direccion").value;
+            let TelFijo = document.getElementById("TelFijo").value;
+            let TelMovil = document.getElementById("TelMovil").value;
+            let FechaNto = document.getElementById("FechaNto").value;
+            let IdSexo = document.getElementById("IdSexo").value;
+            let Foto = document.getElementById("img").src;
+            let nombreusuario = document.getElementById("nombreusuario").value;
+            
+
+            var frm = new FormData();
+            frm.append("Iidpersona", Id);
+            frm.append("Nombre", Nombre);
+            frm.append("Appaterno", apPaterno);
+            frm.append("Apmaterno", apMaterno);
+            frm.append("Email", Email);
+            frm.append("Direccion", Direccion);
+            frm.append("Telefonofijo", TelFijo);
+            frm.append("Telefonocelular", TelMovil);
+            frm.append("FechaNtoString", FechaNto);
+            frm.append("Iidsexo", IdSexo);
+            frm.append("Foto", Foto);
+            frm.append("Nombreusuario", nombreusuario);
+            frm.append("Contraseña", password);
+
+            $.ajax({
+                type: "POST",
+                url: "/Login/Guardar",
+                data: frm,
+                processData: false,
+                contentType: false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        exito("Registrado correctamente..");
+                        window.location = '@Url.Action("Index", "Login")';
+                    }
+                    else {
+                        error();
+                        document.getElementById("divErrores").innerHTML = resp;
+                    }
+                }
+            });
+        }
+    }
+</script>

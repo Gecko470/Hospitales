@@ -41,13 +41,13 @@
                     contenido += "<table class = 'table table-striped'>";
                     contenido += "<thead>";
                     contenido += "<tr>";
-                    contenido += "<th>Mensaje</th><th>Accion</th><th>Controlador</th><th></th>";
+                    contenido += "<th>Mensaje</th><th>Accion</th><th>Controlador</th><th>Tipo Vista</th><th></th>";
                     contenido += "</tr>";
                     contenido += "</thead>";
                     contenido += "<tbody>";
                     resp.forEach((item) => {
                         contenido += "<tr>";
-                        contenido += `<td>${item.mensaje}</td><td>${item.accion}</td><td>${item.controlador}</td><td><input type='checkbox' class = 'check' id = 'chk${item.iidpagina}' /></td>`;
+                        contenido += `<td>${item.mensaje}</td><td>${item.accion}</td><td>${item.controlador}</td><td><select id = 'cbo${item.iidpagina}'><option value = '0'>Selecciona..</option><option value = '1'>Vista Total</option><option value = '2'>Vista Parcial</option></select></td><td><input type='checkbox' class = 'check' id = 'chk${item.iidpagina}' /></td>`;
                         contenido += "</tr>";
                     });
                     contenido += "</tbody>";
@@ -83,7 +83,10 @@
 
             Array.from(checks).forEach(item => {
                 if (item.checked == true) {
-                    frm.append("idPaginas[]", item.id.replace("chk", "") * 1);
+                    let iidpagina = item.id.replace("chk", "") * 1;
+                    frm.append("idPaginas[]", iidpagina);
+                    let cbo = document.getElementById("cbo" + iidpagina).value;
+                    frm.append("idVistas[]", cbo * 1);
                 }
             });
 
@@ -114,6 +117,7 @@
                 resp.forEach(item => {
                     let idcheck = "chk"+item.iidpagina;
                     document.getElementById(idcheck).checked = true;
+                    document.getElementById("cbo"+item.iidpagina).value = item.iidVista;
                 });
             });
         }

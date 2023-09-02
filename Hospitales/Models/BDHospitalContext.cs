@@ -7,8 +7,10 @@ namespace Hospitales.Models
 {
     public partial class BDHospitalContext : DbContext
     {
+
         public BDHospitalContext()
         {
+           
         }
 
         public BDHospitalContext(DbContextOptions<BDHospitalContext> options)
@@ -40,7 +42,7 @@ namespace Hospitales.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Name=DefaultConnection");
+                optionsBuilder.UseSqlServer("Server=LAPTOP-E0NS274E\\SQLEXPRESS;Database=BDHospital;Integrated Security=true;");
             }
         }
 

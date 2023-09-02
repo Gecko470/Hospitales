@@ -1,5 +1,6 @@
 ﻿using Hospitales.Clases;
 using Hospitales.Filters;
+using Hospitales.Helpers;
 using Hospitales.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,10 @@ namespace Hospitales.Controllers
 
         public async Task<IActionResult> Index(TipoUsuarioCLS otipoUsuarioCLS)
         {
+            string controlador = ControllerContext.ActionDescriptor.ControllerName;
+            List<PaginaCLS> listaBotonesPag = Listas.listarBotones(controlador);
+            ViewBag.Botones = listaBotonesPag.Select(x => x.iidBoton).ToList();
+
             List<TipoUsuarioCLS> list = new List<TipoUsuarioCLS>();
 
             list = await (from usuario in context.TipoUsuarios
@@ -71,7 +76,7 @@ namespace Hospitales.Controllers
         }
 
         [HttpPost]
-        public async Task<string> Guardar(TipoUsuarioCLS oTipoUsuarioCLS, int[] idPaginas)
+        public async Task<string> Guardar(TipoUsuarioCLS oTipoUsuarioCLS, int[] idPaginas, int[] idVistas)
         {
             string nombreVista = oTipoUsuarioCLS.Iidtipousuario == 0 ? "Create" : "Edit";
             bool existeNombre = false;
@@ -146,6 +151,8 @@ namespace Hospitales.Controllers
                                 }
                             }
 
+                            int indice = 0;
+
                             foreach (var item in idPaginas)
                             {
                                 var existe = await context.TipoUsuarioPaginas.AnyAsync(x => x.Iidtipousuario == oTipoUsuarioCLS.Iidtipousuario && x.Iidpagina == item);
@@ -155,6 +162,7 @@ namespace Hospitales.Controllers
 
                                     tipoUsuarioPagina.Iidtipousuario = oTipoUsuarioCLS.Iidtipousuario;
                                     tipoUsuarioPagina.Iidpagina = item;
+                                    tipoUsuarioPagina.Iidvista = idVistas[indice];
                                     tipoUsuarioPagina.Bhabilitado = 1;
 
                                     context.TipoUsuarioPaginas.Add(tipoUsuarioPagina);
@@ -162,9 +170,10 @@ namespace Hospitales.Controllers
                                 else
                                 {
                                     TipoUsuarioPagina tipoUsuarioPagina = await context.TipoUsuarioPaginas.FirstOrDefaultAsync(x => x.Iidtipousuario == oTipoUsuarioCLS.Iidtipousuario && x.Iidpagina == item);
+                                    tipoUsuarioPagina.Iidvista = idVistas[indice];
                                     tipoUsuarioPagina.Bhabilitado = 1;
                                 }
-
+                                indice ++;  
                             }
 
                             await context.SaveChangesAsync();
@@ -204,7 +213,8 @@ namespace Hospitales.Controllers
                                           where tipoUsuarioPag.Bhabilitado == 1 && tipoUsuarioPag.Iidtipousuario == id
                                           select new PaginaCLS()
                                           {
-                                              Iidpagina = (int)tipoUsuarioPag.Iidpagina
+                                              Iidpagina = (int)tipoUsuarioPag.Iidpagina,
+                                              iidVista = tipoUsuarioPag.Iidvista == null ? 0 : (int)tipoUsuarioPag.Iidvista
 
                                           }).ToListAsync();
 

@@ -4,6 +4,7 @@
     ViewData["Title"] = "Tipos Usuario Páginas";
     List<SelectListItem> listaTiposUsuario = ViewBag.listaTiposUsuario;
     List<SelectListItem> listaPaginas = ViewBag.listaPaginas;
+    List<int> botones = ViewBag.Botones;
 }
 
 <h1>Tipos Usuario Páginas</h1>
@@ -18,11 +19,28 @@
 
     </div>
     <div>
-        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
-        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
-        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
-        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('TiposUsuarioPaginas')" />
-        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('TipoUsuarioPagina','TiposUsuarioPaginas')" />
+        @if (botones != null && botones.Contains(4))
+        {
+            <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        }
+
+        @if (botones != null && botones.Contains(5))
+        {
+            <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        }
+
+        @if (botones != null && botones.Contains(6))
+        {
+            <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        }
+        @if (botones != null && botones.Contains(7))
+        {
+            <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('TiposUsuarioPaginas')" />
+        }
+        @if (botones != null && botones.Contains(1007))
+        {
+            <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('TipoUsuarioPagina','TiposUsuarioPaginas')" />
+        }
     </div>
 </div>
 
@@ -44,6 +62,23 @@
     </table>
 </form>
 <input type="hidden" id="txtDelete" name="idEliminar" />
+
+@if (botones != null && botones.Contains(2))
+{
+    <input id="editar" type="hidden" value="1" />
+}
+else
+{
+    <input id="editar" type="hidden" value="0" />
+}
+@if (botones != null && botones.Contains(3))
+{
+    <input id="eliminar" type="hidden" value="1" />
+}
+else
+{
+    <input id="eliminar" type="hidden" value="0" />
+}
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -79,6 +114,8 @@
 
         let controller = "TipoUsuarioPagina";
         let campos = ["iidtipousuariopagina", "nombreTipoUsuario", "nombrePagina"];
+        let editar = document.getElementById("editar").value;
+        let eliminar = document.getElementById("eliminar").value;
 
         window.onload = () => {
             Listar();
@@ -126,7 +163,7 @@
 
         function Listar() {
             let url = "/TipoUsuarioPagina/Listar";
-            Tabla(url, campos, controller, true);
+            Tabla(url, campos, controller, true, editar, eliminar);
         }
 
         function Buscar() {
@@ -134,7 +171,7 @@
             let iidTipoUsuario = document.getElementById("iidTipoUsuario").value;
             let url = "/TipoUsuarioPagina/Listar/?iidTipoUsuario=" + iidTipoUsuario;
 
-            Tabla(url, campos, controller, true);
+            Tabla(url, campos, controller, true, editar, eliminar);
         }
 
         function limpiar() {

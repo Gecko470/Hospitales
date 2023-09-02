@@ -2,16 +2,20 @@
 
 @{
     ViewData["Title"] = "Sedes";
+    List<int> botones = ViewBag.Botones;
 }
 
 <h1>Sedes</h1>
 <hr />
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open()">
-            Nueva
-        </button>
-    </div>
+    @if (botones != null && botones.Contains(1))
+    {
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open()">
+                Nueva
+            </button>
+        </div>
+    }
     <div>
         <form asp-controller="Sede" asp-action="Index" method="post" class="d-flex justify-content-center" id="frm">
             <label class="col-form-label me-4">Buscar:</label>
@@ -19,11 +23,28 @@
         </form>
     </div>
     <div>
-        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
-        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
-        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
-        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Sedes')" />
-        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Sede','Sedes')" />
+        @if (botones != null && botones.Contains(4))
+        {
+            <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        }
+
+        @if (botones != null && botones.Contains(5))
+        {
+            <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        }
+
+        @if (botones != null && botones.Contains(6))
+        {
+            <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        }
+        @if (botones != null && botones.Contains(7))
+        {
+            <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Sedes')" />
+        }
+        @if (botones != null && botones.Contains(1007))
+        {
+            <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Sede','Sedes')" />
+        }
     </div>
 </div>
 
@@ -58,8 +79,14 @@
                         @Html.DisplayFor(modelItem => item.Direccion)
                     </td>
                     <td>
-                        <span data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Edit(@item.Iidsede)"><i class="fa fa-pencil-square-o text-primary me-4" aria-hidden="true"></i></span>
-                        <span onclick="Eliminar(@item.Iidsede)"><i class="fa fa-trash-o text-danger" aria-hidden="true"></i></span>
+                        @if (botones != null && botones.Contains(2))
+                        {
+                            <span data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Edit(@item.Iidsede)"><i class="fa fa-pencil-square-o text-primary me-4" aria-hidden="true"></i></span>
+                        }
+                        @if (botones != null && botones.Contains(3))
+                        {
+                            <span onclick="Eliminar(@item.Iidsede)"><i class="fa fa-trash-o text-danger" aria-hidden="true"></i></span>
+                        }
                     </td>
                 </tr>
             }
@@ -71,6 +98,8 @@
 <form asp-action="Delete" asp-controller="Sede" method="post" id="frmDelete">
     <input type="hidden" id="txtDelete" name="idEliminar" />
 </form>
+
+
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -118,7 +147,6 @@
 
         function Edit(id) {
             $.get("/Sede/Edit/?id=" + id, (resp) => {
-                console.log(resp);
                 if (resp != "") {
                     document.getElementById("Id").value = resp.iidsede;
                     document.getElementById("Nombre").value = resp.nombre;

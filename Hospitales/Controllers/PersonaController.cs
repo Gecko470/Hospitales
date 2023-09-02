@@ -24,6 +24,10 @@ namespace Hospitales.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            string controlador = ControllerContext.ActionDescriptor.ControllerName;
+            List<PaginaCLS> listaBotonesPag = Listas.listarBotones(controlador);
+            ViewBag.Botones = listaBotonesPag.Select(x => x.iidBoton).ToList();
+
             await LlenarSexo();
 
             return View();
@@ -34,29 +38,10 @@ namespace Hospitales.Controllers
             await LlenarSexo();
             List<PersonaCLS> list = new List<PersonaCLS>();
 
-            list = await (from persona in context.Personas
-                          join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
-                          where persona.Bhabilitado == 1
-                          select new PersonaCLS()
-                          {
-                              Iidpersona = persona.Iidpersona,
-                              NombreCompleto = persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno,
-                              Email = persona.Email == null ? "" : persona.Email,
-                              NombreSexo = sexo.Nombre,
-                              FechaNtoString = string.Format("{0:dd-MM-yyyy}", persona.Fechanacimiento)
-                          }).ToListAsync();
+            int idUsuario = int.Parse(HttpContext.Session.GetString("user"));
+            int idVista = await Listas.TipoVista("Persona", idUsuario);
 
-            listaPersonas = list;
-            return list;
-        }
-
-        public async Task<List<PersonaCLS>> Filtrar(int Iidsexo)
-        {
-            await LlenarSexo();
-
-            List<PersonaCLS> list = new List<PersonaCLS>();
-
-            if (Iidsexo == 0)
+            if (idVista == 1)
             {
                 list = await (from persona in context.Personas
                               join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
@@ -69,31 +54,107 @@ namespace Hospitales.Controllers
                                   NombreSexo = sexo.Nombre,
                                   FechaNtoString = string.Format("{0:dd-MM-yyyy}", persona.Fechanacimiento)
                               }).ToListAsync();
-
-                //list = await context.Personas.Include("Sexo").Where(x => x.Bhabilitado == 1).OrderByDescending(x => x.Iidpersona).Select(x => new PersonaCLS()
-                //{
-                //    Iidpersona = x.Iidpersona,
-                //    NombreCompleto = x.Nombre + " " + x.Appaterno + " " + x.Apmaterno,
-                //    Email = x.Email,
-                //    NombreSexo = x.IidsexoNavigation.Nombre,
-                //    FechaNtoString = x.Fechanacimiento.Value.ToShortDateString()
-
-                //}).ToListAsync();
-
             }
             else
             {
                 list = await (from persona in context.Personas
                               join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
-                              where persona.Bhabilitado == 1 && persona.Iidsexo == Iidsexo
+                              where persona.Bhabilitado == 1 && persona.Iidusuario == idUsuario
                               select new PersonaCLS()
                               {
                                   Iidpersona = persona.Iidpersona,
                                   NombreCompleto = persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno,
                                   Email = persona.Email == null ? "" : persona.Email,
                                   NombreSexo = sexo.Nombre,
-                                  FechaNtoString = persona.Fechanacimiento.Value.ToString("dd-MM-yyyy")
+                                  FechaNtoString = string.Format("{0:dd-MM-yyyy}", persona.Fechanacimiento)
                               }).ToListAsync();
+            }
+
+            listaPersonas = list;
+            return list;
+        }
+
+        public async Task<List<PersonaCLS>> Filtrar(int Iidsexo)
+        {
+            await LlenarSexo();
+
+            int idUsuario = int.Parse(HttpContext.Session.GetString("user"));
+            int idVista = await Listas.TipoVista("Persona", idUsuario);
+
+            List<PersonaCLS> list = new List<PersonaCLS>();
+
+            if (Iidsexo == 0)
+            {
+                if (idVista == 1)
+                {
+                    list = await (from persona in context.Personas
+                                  join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
+                                  where persona.Bhabilitado == 1
+                                  select new PersonaCLS()
+                                  {
+                                      Iidpersona = persona.Iidpersona,
+                                      NombreCompleto = persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno,
+                                      Email = persona.Email == null ? "" : persona.Email,
+                                      NombreSexo = sexo.Nombre,
+                                      FechaNtoString = string.Format("{0:dd-MM-yyyy}", persona.Fechanacimiento)
+                                  }).ToListAsync();
+
+                    //list = await context.Personas.Include("Sexo").Where(x => x.Bhabilitado == 1).OrderByDescending(x => x.Iidpersona).Select(x => new PersonaCLS()
+                    //{
+                    //    Iidpersona = x.Iidpersona,
+                    //    NombreCompleto = x.Nombre + " " + x.Appaterno + " " + x.Apmaterno,
+                    //    Email = x.Email,
+                    //    NombreSexo = x.IidsexoNavigation.Nombre,
+                    //    FechaNtoString = x.Fechanacimiento.Value.ToShortDateString()
+
+                    //}).ToListAsync();
+                }
+                else
+                {
+                    list = await (from persona in context.Personas
+                                  join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
+                                  where persona.Bhabilitado == 1 && persona.Iidusuario == idUsuario
+                                  select new PersonaCLS()
+                                  {
+                                      Iidpersona = persona.Iidpersona,
+                                      NombreCompleto = persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno,
+                                      Email = persona.Email == null ? "" : persona.Email,
+                                      NombreSexo = sexo.Nombre,
+                                      FechaNtoString = string.Format("{0:dd-MM-yyyy}", persona.Fechanacimiento)
+                                  }).ToListAsync();
+                }
+
+            }
+            else
+            {
+                if (idVista == 1)
+                {
+                    list = await (from persona in context.Personas
+                                  join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
+                                  where persona.Bhabilitado == 1 && persona.Iidsexo == Iidsexo
+                                  select new PersonaCLS()
+                                  {
+                                      Iidpersona = persona.Iidpersona,
+                                      NombreCompleto = persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno,
+                                      Email = persona.Email == null ? "" : persona.Email,
+                                      NombreSexo = sexo.Nombre,
+                                      FechaNtoString = persona.Fechanacimiento.Value.ToString("dd-MM-yyyy")
+                                  }).ToListAsync();
+                }
+                else
+                {
+                    list = await (from persona in context.Personas
+                                  join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
+                                  where persona.Bhabilitado == 1 && persona.Iidsexo == Iidsexo && persona.Iidusuario == idUsuario
+                                  select new PersonaCLS()
+                                  {
+                                      Iidpersona = persona.Iidpersona,
+                                      NombreCompleto = persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno,
+                                      Email = persona.Email == null ? "" : persona.Email,
+                                      NombreSexo = sexo.Nombre,
+                                      FechaNtoString = persona.Fechanacimiento.Value.ToString("dd-MM-yyyy")
+                                  }).ToListAsync();
+                }
             }
 
             listaPersonas = list;
@@ -193,6 +254,7 @@ namespace Hospitales.Controllers
                         persona.Fechanacimiento = DateTime.ParseExact(oPersonaCLS.FechaNtoString, format, CultureInfo.InvariantCulture);
                         persona.Iidsexo = oPersonaCLS.Iidsexo;
                         persona.Foto = oPersonaCLS.Foto;
+                        persona.Iidusuario = int.Parse(HttpContext.Session.GetString("user"));
                         persona.Bdoctor = 0;
                         persona.Bpaciente = 0;
                         persona.Btieneusuario = 0;

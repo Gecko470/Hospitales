@@ -26,11 +26,11 @@ namespace Hospitales.Clases
         [Display(Name = "Grupo Sanguíneo")]
         public int? Iidtiposangre { get; set; }
         [Display(Name = "Enfermedades crónicas")]
-        public string? Enfermedadescronicas { get; set; }
+        public string Enfermedadescronicas { get; set; }
         [Display(Name = "Vacunas")]
-        public string? Cuadrovacunas { get; set; }
+        public string Cuadrovacunas { get; set; }
         [Display(Name = "Antecedentes quirúrgicos")]
-        public string? Antecedentesquirurgicos { get; set; }
+        public string Antecedentesquirurgicos { get; set; }
         [Display(Name = "Persona")]
         public int? Iidpersona { get; set; }
         public int? Bhabilitado { get; set; }

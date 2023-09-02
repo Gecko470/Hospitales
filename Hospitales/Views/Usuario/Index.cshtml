@@ -5,16 +5,20 @@
     ViewData["Title"] = "Usuarios";
     List<SelectListItem> listaTiposUsuario = ViewBag.listaTiposUsuario;
     List<SelectListItem> listaPersonas = ViewBag.listaPersonas;
+    List<int> botones = ViewBag.Botones;
 }
 
 <h1>Usuarios</h1>
 <hr />
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open(0)">
-            Nuevo
-        </button>
-    </div>
+    @if (botones != null && botones.Contains(1))
+    {
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="Open(0)">
+                Nuevo
+            </button>
+        </div>
+    }
     <div class="d-flex">
         <label class="col-form-label me-4">Buscar:</label>
         <input type="text" class="form form-control" placeholder="Nombre Usuario.." name="Nombre" id="txtNombre" value="@ViewBag.Nombre" />
@@ -22,11 +26,28 @@
         <input type="button" value="Limpiar" class="btn btn-danger ms-2" onclick="limpiar()" />
     </div>
     <div>
-        <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
-        <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
-        <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
-        <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Especialidades')" />
-        <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Especialidad','Especialidades')" />
+        @if (botones != null && botones.Contains(4))
+        {
+            <input type="button" value="Excel" class="btn btn-outline-success" onclick="Excel()" />
+        }
+
+        @if (botones != null && botones.Contains(5))
+        {
+            <input type="button" value="Word" class="btn btn-outline-primary ms-2" onclick="Word()" />
+        }
+
+        @if (botones != null && botones.Contains(6))
+        {
+            <input type="button" value="PDF" class="btn btn-outline-danger ms-2" onclick="PDF()" />
+        }
+        @if (botones != null && botones.Contains(7))
+        {
+            <input type="button" value="Imprimir" class="btn btn-outline-secondary ms-2" onclick="Imprimir('Usuarios')" />
+        }
+        @if (botones != null && botones.Contains(1007))
+        {
+            <input type="button" value="Descargar" class="btn btn-outline-info ms-2" onclick="DescargarPDF('Usuario','Usuarios')" />
+        }
     </div>
 </div>
 
@@ -52,6 +73,22 @@
 
 <input type="hidden" id="txtDelete" name="idEliminar" />
 
+@if (botones != null && botones.Contains(2))
+{
+    <input id="editar" type="hidden" value="1" />
+}
+else
+{
+    <input id="editar" type="hidden" value="0" />
+}
+@if (botones != null && botones.Contains(3))
+{
+    <input id="eliminar" type="hidden" value="1" />
+}
+else
+{
+    <input id="eliminar" type="hidden" value="0" />
+}
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -103,6 +140,8 @@
         let controller = "Usuario";
         let action = "Edit";
         let campos = ["iidusuario", "nombreCompleto", "usuario", "tipoUsuario"];
+        let editar = document.getElementById("editar").value;
+        let eliminar = document.getElementById("eliminar").value;
 
         window.onload = () => {
 
@@ -111,7 +150,7 @@
 
         function Listar() {
             let url = "/Usuario/Listar";
-            Tabla(url, campos, controller, true);
+            Tabla(url, campos, controller, true, editar, eliminar);
         }
 
         function Buscar() {
@@ -119,7 +158,7 @@
             let nombre = document.getElementById("txtNombre").value;
             let url = "/Usuario/Filtrar/?nombre=" + nombre;
 
-            Tabla(url, campos, controller, true);
+            Tabla(url, campos, controller, true, editar, eliminar);
         }
 
         function limpiar() {
@@ -152,7 +191,7 @@
                 $("#exampleModalLabel").text("Usuario - Edit");
                 document.getElementById("divPersona").style.display = "none";
                 document.getElementById("divPass").style.display = "none";
-                
+
             }
         }
 
