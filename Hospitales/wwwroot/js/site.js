@@ -3,9 +3,9 @@
 
 // Write your JavaScript code.
 
-function mostrarModal() {
+function mostrarModal(msg) {
     return Swal.fire({
-        title: 'Quieres guardar los cambios?',
+        title: msg,
         showDenyButton: true,
         showCancelButton: false,
         confirmButtonText: 'Aceptar',

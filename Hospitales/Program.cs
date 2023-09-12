@@ -27,11 +27,11 @@ if (!app.Environment.IsDevelopment())
 
 var cultureInfo = new CultureInfo("en-US");
 //cultureInfo.NumberFormat.NumberGroupSeparator = ",";
-
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();

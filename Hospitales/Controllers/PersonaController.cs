@@ -57,6 +57,7 @@ namespace Hospitales.Controllers
             }
             else
             {
+
                 list = await (from persona in context.Personas
                               join sexo in context.Sexos on persona.Iidsexo equals sexo.Iidsexo
                               where persona.Bhabilitado == 1 && persona.Iidusuario == idUsuario

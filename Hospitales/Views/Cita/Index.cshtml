@@ -1,0 +1,549 @@
+﻿@{
+    ViewData["Title"] = "Citas";
+    List<SelectListItem> listaSedes = ViewBag.listaSedes;
+    List<SelectListItem> listaPersonas = ViewBag.listaPersonas;
+    List<SelectListItem> listaEstadoCitas = ViewBag.listaEstadoCitas;
+    List<SelectListItem> listaDoctores = ViewBag.listaDoctores;
+    List<int> botones = ViewBag.Botones;
+}
+
+<h1>Citas</h1>
+<hr />
+<div style="display: grid; grid-template-columns: 1fr 2fr; grid-gap: 2em;">
+    <div>
+        <h3>Nueva Cita</h3>
+        <hr />
+        <div class="form-group mb-2">
+            <label class="control-label">Nombre Paciente</label>
+            <select asp-items="listaPersonas" id="Iidpersona" class="form-control form-select limpiar"></select>
+        </div>
+        <div class="form-group mb-2">
+            <label class="control-label">Fecha Cita</label>
+            <input type="text" id="Dfechacita" class="form-control limpiar" />
+        </div>
+        <div class="form-group mb-2">
+            <label class="control-label">Sede</label>
+            <select asp-items="listaSedes" id="Iidsede" class="form-control form-select limpiar"></select>
+        </div>
+        <div class="form-group mb-3">
+            <label class="control-label">Descripción enfermedad</label>
+            <textarea id="Descripcionenfermedad" class="form-control limpiar" rows="4"></textarea>
+        </div>
+        <div id="divErrores"></div>
+        <div style="display: flex; justify-content: right;">
+            <button class="btn btn-primary" onclick="Guardar()">Aceptar</button>
+        </div>
+    </div>
+    <input type="hidden" id="txt_iidVista" value="@ViewBag.iidVista" />
+    <div id="divTabla">
+        <h3>Citas</h3>
+        <hr />
+        <select asp-items="listaEstadoCitas" id="cboEstados" class="form-control form-select" onchange="Buscar()"></select>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Paciente</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Estado</th>
+                    <th colspan="7">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody id="tbodyCitas"></tbody>
+        </table>
+    </div>
+</div>
+
+@if (botones != null && botones.Contains(2))
+{
+    <input id="editar" type="hidden" value="1" />
+}
+else
+{
+    <input id="editar" type="hidden" value="0" />
+}
+@if (botones != null && botones.Contains(3))
+{
+    <input id="eliminar" type="hidden" value="1" />
+}
+else
+{
+    <input id="eliminar" type="hidden" value="0" />
+}
+
+<!-- Modal -->
+<div class="modal fade" id="historicoModal" tabindex="-1" aria-labelledby="historicoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="historicoModalLabel"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtiidCita" />
+                <div id="divHistorial">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Id Cita</th>
+                                <th>Estado</th>
+                                <th>Usuario</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
+                </div>
+                <div id="divAnulacion">
+                    <div class="form-group mb-3">
+                        <label class="control-label">Motivo Anulación</label>
+                        <textarea id="txaMotivo" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+                <div id="divRevisar">
+                    <div class="form-group">
+                        <label class="control-label">Doctor</label>
+                        <select asp-items="listaDoctores" id="iidDoctor" class="form-control form-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Fecha</label>
+                        <input id="fechaCita" type="datetime-local" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Precio</label>
+                        <input id="precioCita" type="text" class="form-control" />
+                    </div>
+                    <div id="divErroesRevisar"></div>
+                </div>
+                <div id="divObservar">
+                    <div class="form-group mb-3">
+                        <label class="control-label">Motivo Observación</label>
+                        <textarea id="txaMotivoObs" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+                <div id="divEditar">
+                    <div class="form-group mb-2">
+                        <label class="control-label">Nombre Paciente</label>
+                        <select asp-items="listaPersonas" id="IidpersonaEdit" class="form-control form-select limpiar"></select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="control-label">Fecha Cita</label>
+                        <input type="text" id="DfechacitaEdit" class="form-control limpiar" />
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="control-label">Sede</label>
+                        <select asp-items="listaSedes" id="IidsedeEdit" class="form-control form-select limpiar"></select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="control-label">Descripción enfermedad</label>
+                        <textarea id="DescripcionenfermedadEdit" class="form-control limpiar" rows="4"></textarea>
+                    </div>
+                    <div id="divErroresEdit"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnClose">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarModal()" id="btnAceptar">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        window.onload = () => {
+            Listar();
+        }
+
+        $(function () {
+            $("#Dfechacita").datepicker({ dateFormat: "dd-mm-yy", changeMonth: true, changeYear: true, yearRange: "2000:2025" });
+            $("#DfechacitaEdit").datepicker({ dateFormat: "dd-mm-yy", changeMonth: true, changeYear: true, yearRange: "2000:2025" });
+        });
+
+        function Guardar() {
+            let Iidpersona = document.getElementById("Iidpersona").value * 1;
+            let Dfechacita = document.getElementById("Dfechacita").value;
+            let Iidsede = document.getElementById("Iidsede").value;
+            let Descripcionenfermedad = document.getElementById("Descripcionenfermedad").value;
+
+            var frm = new FormData();
+            frm.append("Iidpersona", Iidpersona);
+            frm.append("Dfechacita", Dfechacita);
+            frm.append("Iidsede", Iidsede);
+            frm.append("Descripcionenfermedad", Descripcionenfermedad);
+
+            $.ajax({
+                type: "POST",
+                url: "/Cita/Guardar",
+                data: frm,
+                processData: false,
+                contentType: false,
+                success: (resp) => {
+                    if (resp == "1") {
+                        exito("Guardado correctamente..");
+                        document.getElementById("divErrores").innerHTML = "";
+                        Limpiar();
+                        Listar();
+                    }
+                    else {
+                        error();
+                        document.getElementById("divErrores").innerHTML = resp;
+                    }
+                }
+            });
+        }
+
+        function Limpiar() {
+            let controles = document.getElementsByClassName("limpiar");
+            Array.from(controles).forEach(item => item.value = "");
+        }
+
+        function Listar() {
+            let contenido = "";
+            let iidVista = document.getElementById("txt_iidVista").value;
+
+            $.get("/Cita/Listar", (resp) => {
+                Array.from(resp).forEach(item => {
+                    if (item.iidEstadoCita == 2) {
+                        contenido += `<tr style="color: blue;">`;
+                    }
+                    else if (item.iidEstadoCita == 3) {
+                        contenido += `<tr style="color: red;">`;
+                    }
+                    else if (item.iidEstadoCita == 5) {
+                        contenido += `<tr style="color: #4AC9F0;">`;
+                    }
+                    else if (item.iidEstadoCita == 6) {
+                        contenido += `<tr style="color: orange;">`;
+                    }
+                    else if (item.iidEstadoCita == 7) {
+                        contenido += `<tr style="color: green;">`;
+                    }
+                    else {
+                        contenido += `<tr>`;
+                    }
+                    contenido += `<td>${item.iidcita}</td><td>${item.nombrePersona}</td><td>${item.dfechacita}</td><td>${item.nombreUsuario}</td><td>${item.nombreEstado}</td>`;
+                    contenido += `<td><i onclick="Open('Historial Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-eye' style="cursor: pointer; color: blue;"></i></td>`;
+                    if (item.iidEstadoCita == 2 && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Observar Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-share' style="cursor: pointer; color: gray;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 2 && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Revisar Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-check' style="cursor: pointer; color: green;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 1) {
+                        contenido += `<td><i onclick="Eliminar(${item.iidcita})" class='fa fa-trash' style="cursor: pointer; color: red;"></i></td>`;
+                        contenido += `<td><i onclick="Enviar(${item.iidcita})" class='fa fa-envelope-square' style="cursor: pointer; color: orange;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 2 && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Anular Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-remove' style="cursor: pointer; color: purple;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 6) {
+                        contenido += `<td><i onclick="Justificar(${item.iidcita})" class='fa fa-envelope-square' style="cursor: pointer; color: #4AC9F0;"></i></td>`;
+                    }
+                    if ((item.iidEstadoCita == 1 || item.iidEstadoCita == 6) && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Editar Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-edit' style="cursor: pointer; color: brown;" ></i></td>`;
+                    }
+                    contenido += `</tr>`;
+                });
+                document.getElementById("tbodyCitas").innerHTML = contenido;
+            });
+
+        }
+
+        function Buscar() {
+            let nEstado = document.getElementById("cboEstados").value;
+            let iidVista = document.getElementById("txt_iidVista").value;
+            let contenido = "";
+
+            $.get("/Cita/Listar/?nEstado=" + nEstado, (resp) => {
+                Array.from(resp).forEach(item => {
+                    if (item.iidEstadoCita == 2) {
+                        contenido += `<tr style="color: blue;">`;
+                    }
+                    else if (item.iidEstadoCita == 3) {
+                        contenido += `<tr style="color: red;">`;
+                    }
+                    else if (item.iidEstadoCita == 5) {
+                        contenido += `<tr style="color: #4AC9F0;">`;
+                    }
+                    else if (item.iidEstadoCita == 6) {
+                        contenido += `<tr style="color: orange;">`;
+                    }
+                    else if (item.iidEstadoCita == 7) {
+                        contenido += `<tr style="color: green;">`;
+                    }
+                    else {
+                        contenido += `<tr>`;
+                    }
+                    contenido += `<td>${item.iidcita}</td><td>${item.nombrePersona}</td><td>${item.dfechacita}</td><td>${item.nombreUsuario}</td><td>${item.nombreEstado}</td>`;
+                    contenido += `<td><i onclick="Open('Historial Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-eye' style="cursor: pointer; color: blue;"></i></td>`;
+                    if (item.iidEstadoCita == 2 && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Observar Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-share' style="cursor: pointer; color: gray;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 2 && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Revisar Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-check' style="cursor: pointer; color: green;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 1) {
+                        contenido += `<td><i onclick="Eliminar(${item.iidcita})" class='fa fa-trash' style="cursor: pointer; color: red;"></i></td>`;
+                        contenido += `<td><i onclick="Enviar(${item.iidcita})" class='fa fa-envelope-square' style="cursor: pointer; color: orange;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 2 && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Anular Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-remove' style="cursor: pointer; color: purple;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 6) {
+                        contenido += `<td><i onclick="Justificar(${item.iidcita})" class='fa fa-envelope-square' style="cursor: pointer; color: #4AC9F0;"></i></td>`;
+                    }
+                    if (item.iidEstadoCita == 1 && iidVista == 1) {
+                        contenido += `<td><i onclick="Open('Editar Cita', ${item.iidcita})" data-bs-toggle="modal" data-bs-target="#historicoModal" class='fa fa-edit' style="cursor: pointer; color: brown;" ></i></td>`;
+                    }
+                    contenido += `</tr>`;
+                });
+                document.getElementById("tbodyCitas").innerHTML = contenido;
+            });
+        }
+
+        function Open(op, iidCita) {
+
+            let controller = "Cita";
+            let campos = ["iidhistorialcita", "iidcita", "nombreEstado", "nombreUsuario", "dfecha"];
+            document.getElementById("divHistorial").style.display = "none";
+            document.getElementById("divAnulacion").style.display = "none";
+            document.getElementById("divRevisar").style.display = "none";
+            document.getElementById("divObservar").style.display = "none";
+            document.getElementById("divEditar").style.display = "none";
+            document.getElementById("btnAceptar").style.display = "inline-block";
+
+
+            if (op == "Historial Cita") {
+                document.getElementById("historicoModalLabel").innerHTML = op;
+                document.getElementById("divHistorial").style.display = "block";
+                document.getElementById("btnAceptar").style.display = "none";
+
+                let url = "/Cita/ListarHistorial/?iidCita=" + iidCita;
+                Tabla(url, campos, controller, true, false, false);
+            }
+            else if (op == "Anular Cita") {
+                document.getElementById("historicoModalLabel").innerHTML = op;
+                document.getElementById("divAnulacion").style.display = "block";
+                document.getElementById("txtiidCita").value = iidCita;
+                document.getElementById("txaMotivo").value = "";
+            }
+            else if (op == "Revisar Cita") {
+                document.getElementById("historicoModalLabel").innerHTML = op;
+                document.getElementById("divRevisar").style.display = "block";
+                document.getElementById("txtiidCita").value = iidCita;
+                document.getElementById("txaMotivo").value = "";
+                document.getElementById("divErroesRevisar").innerHTML = "";
+            }
+            else if (op == "Observar Cita") {
+                document.getElementById("historicoModalLabel").innerHTML = op;
+                document.getElementById("divObservar").style.display = "block";
+                document.getElementById("txtiidCita").value = iidCita;
+                document.getElementById("txaMotivoObs").value = "";
+            }
+            else if (op == "Editar Cita") {
+                document.getElementById("historicoModalLabel").innerHTML = op;
+                document.getElementById("divEditar").style.display = "block";
+                document.getElementById("txtiidCita").value = iidCita;
+                document.getElementById("divErroresEdit").innerHTML = "";
+                LimpiarEdit();
+
+                $.get("/Cita/Edit/?id=" + iidCita, (resp) => {
+
+                    document.getElementById("IidpersonaEdit").value = resp.iidpersona;
+                    document.getElementById("DfechacitaEdit").value = resp.dfechacita;
+                    document.getElementById("IidsedeEdit").value = resp.iidsede;
+                    document.getElementById("DescripcionenfermedadEdit").value = resp.descripcionenfermedad;
+
+                });
+
+            }
+        }
+
+        function LimpiarEdit() {
+            document.getElementById("IidpersonaEdit").value = "";
+            document.getElementById("DfechacitaEdit").value = "";
+            document.getElementById("IidsedeEdit").value = "";
+            document.getElementById("DescripcionenfermedadEdit").value = "";
+        }
+
+        function Enviar(iidCita) {
+            mostrarModal("Quieres cambiar es estado de la cita?..").then(result => {
+                if (result.isConfirmed) {
+                    $.post("/Cita/CambiarEstado", { idEstado: 2, idCita: iidCita }, (resp) => {
+                        if (resp == "1") {
+                            Listar();
+                            exito("Estado cambiado correctamente..");
+                        }
+                        else {
+                            error();
+                        }
+                    });
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+        function Eliminar(iidCita) {
+            mostrarModal("Quieres eliminar la cita?..").then(result => {
+                if (result.isConfirmed) {
+                    $.post("/Cita/Eliminar", { iidCita: iidCita }, (resp) => {
+                        if (resp == "1") {
+                            Listar();
+                            exito("Eliminado correctamente..");
+                        }
+                        else {
+                            error();
+                        }
+                    });
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+        function GuardarModal() {
+            let iidCita = document.getElementById("txtiidCita").value;
+            let titulo = document.getElementById("historicoModalLabel").innerHTML;
+            let motivo = document.getElementById("txaMotivo").value;
+            let motivoObs = document.getElementById("txaMotivoObs").value;
+
+            if (titulo == "Anular Cita") {
+                mostrarModal("Quieres anular la cita?..").then(result => {
+                    if (result.isConfirmed) {
+
+                        $.post("/Cita/CambiarEstado", { idEstado: 3, idCita: iidCita, motivo: motivo }, (resp) => {
+                            if (resp == "1") {
+                                Listar();
+                                exito("Cita anulada correctamente..");
+                                document.getElementById("btnClose").click();
+                            }
+                            else {
+                                error();
+                            }
+                        });
+
+                    } else if (result.isDenied) {
+                        Swal.fire('Los cambios no se han guardado', '', 'info')
+                    }
+                });
+            }
+            else if (titulo == "Revisar Cita") {
+                let iidDoctor = document.getElementById("iidDoctor").value;
+                let fechaCita = document.getElementById("fechaCita").value;
+                let precioCita = document.getElementById("precioCita").value;
+
+                let frm = new FormData();
+
+                frm.append("iidDoctor", iidDoctor);
+                frm.append("fechaCita", fechaCita);
+                frm.append("precioCita", precioCita);
+                frm.append("iidCita", iidCita);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Cita/Revisar",
+                    data: frm,
+                    contentType: false,
+                    processData: false,
+                    success: (resp) => {
+                        if (resp == "1") {
+                            Listar();
+                            exito("Guardado correctamente..");
+                            document.getElementById("btnClose").click();
+                        }
+                        else {
+                            error();
+                            document.getElementById("divErroesRevisar").innerHTML = resp;
+                        }
+                    }
+                });
+            }
+            else if (titulo == "Observar Cita") {
+                mostrarModal("Quieres cambiar la cita a estado Observar?..").then(result => {
+                    if (result.isConfirmed) {
+
+                        $.post("/Cita/CambiarEstado", { idEstado: 6, idCita: iidCita, motivo: motivoObs }, (resp) => {
+                            if (resp == "1") {
+                                Listar();
+                                exito("Estado de la cita cambiado correctamente..");
+                                document.getElementById("btnClose").click();
+                            }
+                            else {
+                                error();
+                            }
+                        });
+
+                    } else if (result.isDenied) {
+                        Swal.fire('Los cambios no se han guardado', '', 'info')
+                    }
+                });
+            }
+            else if (titulo == "Editar Cita") {
+                let IidpersonaEdit = document.getElementById("IidpersonaEdit").value;
+                let DfechacitaEdit = document.getElementById("DfechacitaEdit").value;
+                let IidsedeEdit = document.getElementById("IidsedeEdit").value;
+                let DescripcionenfermedadEdit = document.getElementById("DescripcionenfermedadEdit").value;
+
+                let frm = new FormData();
+
+                frm.append("Iidcita", iidCita);
+                frm.append("Iidpersona", IidpersonaEdit);
+                frm.append("Dfechacita", DfechacitaEdit);
+                frm.append("Iidsede", IidsedeEdit);
+                frm.append("Descripcionenfermedad", DescripcionenfermedadEdit);
+
+                mostrarModal("Quieres guardar los datos?..").then(result => {
+                    if (result.isConfirmed) {
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/Cita/Guardar",
+                            data: frm,
+                            processData: false,
+                            contentType: false,
+                            success: (resp) => {
+                                if (resp == "1") {
+                                    exito("Guardado correctamente..");
+                                    document.getElementById("btnClose").click();
+                                    Listar();
+                                }
+                                else {
+                                    error();
+                                    document.getElementById("divErroresEdit").innerHTML = resp;
+                                }
+                            }
+                        });
+
+                    } else if (result.isDenied) {
+                        Swal.fire('Los cambios no se han guardado', '', 'info')
+                    }
+                });
+            }
+        }
+
+        function Justificar(iidCita) {
+            mostrarModal("Quieres cambiar es estado de la cita?..").then(result => {
+                if (result.isConfirmed) {
+                    $.post("/Cita/CambiarEstado", { idEstado: 5, idCita: iidCita }, (resp) => {
+                        if (resp == "1") {
+                            Listar();
+                            exito("Estado cambiado correctamente..");
+                        }
+                        else {
+                            error();
+                        }
+                    });
+                } else if (result.isDenied) {
+                    Swal.fire('Los cambios no se han guardado', '', 'info')
+                }
+            });
+        }
+
+    </script>
+}
